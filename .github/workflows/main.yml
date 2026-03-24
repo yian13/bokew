@@ -1,1 +1,29 @@
+name: Auto-Sync-Nav
+on:
+  push:
+    paths:
+      - 'bookmarks.html'
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch: # 允许你手动点击按钮运行
 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: pip install requests
+      - name: Process Bookmarks
+        run: python sync_bookmarks.py
+      - name: Commit Change
+        run: |
+          git config --local user.email "bot@github.com"
+          git config --local user.name "Bookmark-Bot"
+          git add data.json
+          git commit -m "Update links status" || exit 0
+          git push
