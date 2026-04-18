@@ -1,166 +1,167 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>六合彩公式计算器 - 平一+5</title>
-  <style>
-    body {
-      font-family: "Microsoft YaHei", sans-serif;
-      max-width: 600px;
-      margin: 40px auto;
-      padding: 20px;
-      background-color: #f9f9f9;
-      color: #333;
-    }
-    h1 {
-      text-align: center;
-      color: #d32f2f;
-    }
-    .input-group {
-      margin: 20px 0;
-    }
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
-    }
-    button {
-      display: block;
-      width: 100%;
-      padding: 12px;
-      font-size: 18px;
-      background-color: #1976d2;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    button:hover {
-      background-color: #1565c0;
-    }
-    #result {
-      margin-top: 20px;
-      padding: 15px;
-      background-color: #e8f5e9;
-      border-left: 4px solid #4caf50;
-      font-size: 18px;
-      display: none;
-    }
-    .error {
-      background-color: #ffebee;
-      border-left-color: #f44336;
-      color: #c62828;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>澳门公式规律计算器</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        h2 { text-align: center; color: #333; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover { background-color: #b71c1c; }
+        .result-card {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            border-left: 5px solid #d32f2f;
+        }
+        .result-title { font-weight: bold; font-size: 1.1em; margin-bottom: 5px; color: #d32f2f; }
+        .result-value { font-size: 1.4em; font-weight: bold; color: #333; }
+        .note { font-size: 0.85em; color: #777; margin-top: 10px; }
+    </style>
 </head>
 <body>
-  <h1>六合彩公式计算器</h1>
-  <p style="text-align: center;">公式：平一 + 5 → 查生肖</p>
 
-  <div class="input-group">
-    <label for="numbers">请输入7个开奖号码（用空格或逗号分隔）：</label>
-    <input type="text" id="numbers" placeholder="例如：25 31 06 33 30 02 27" />
-  </div>
+<div class="container">
+    <h2>澳门公式规律计算器</h2>
 
-  <button onclick="calculate()">计算生肖</button>
+    <div class="input-group">
+        <label for="numbers">请输入号码 (空格或逗号分隔):</label>
+        <input type="text" id="numbers" placeholder="例如: 25 31 06 33 30 02 27">
+    </div>
 
-  <div id="result"></div>
+    <button onclick="calculateAll()">一键计算所有公式</button>
 
-  <script>
-    // 标准六合彩生肖对应表（01=鸡）
-    const shengxiaoMap = {
-      '01': '鸡', '02': '狗', '03': '猪',
-      '04': '鼠', '05': '牛', '06': '虎',
-      '07': '兔', '08': '龙', '09': '蛇',
-      '10': '马', '11': '羊', '12': '猴',
-      '13': '鸡', '14': '狗', '15': '猪',
-      '16': '鼠', '17': '牛', '18': '虎',
-      '19': '兔', '20': '龙', '21': '蛇',
-      '22': '马', '23': '羊', '24': '猴',
-      '25': '鸡', '26': '狗', '27': '猪',
-      '28': '鼠', '29': '牛', '30': '虎', // ⚠️ 标准是“虎”
-      '31': '兔', '32': '龙', '33': '蛇',
-      '34': '马', '35': '羊', '36': '猴',
-      '37': '鸡', '38': '狗', '39': '猪',
-      '40': '鼠', '41': '牛', '42': '虎',
-      '43': '兔', '44': '龙', '45': '蛇',
-      '46': '马', '47': '羊', '48': '猴',
-      '49': '鸡'
+    <div id="results"></div>
+</div>
+
+<script>
+    // 生肖对应表 (01=马, 02=蛇...以此类推，根据图片上下文)
+    const zodiacMap = {
+        1: "马", 2: "蛇", 3: "龙", 4: "兔", 5: "虎", 6: "牛", 7: "鼠",
+        8: "猪", 9: "狗", 10: "鸡", 11: "猴", 12: "羊"
     };
 
-    // 如果您坚持 30 对应“牛”，请取消下一行的注释（覆盖上面的值）
-    // shengxiaoMap['30'] = '牛';
-
-    function calculate() {
-      const input = document.getElementById('numbers').value.trim();
-      const resultDiv = document.getElementById('result');
-      resultDiv.style.display = 'block';
-      resultDiv.className = '';
-
-      if (!input) {
-        resultDiv.textContent = '请输入号码！';
-        resultDiv.className = 'error';
-        return;
-      }
-
-      // 支持空格、逗号、中文逗号分隔
-      const numbers = input.split(/[\s,，]+/).filter(n => n !== '');
-
-      if (numbers.length < 1) {
-        resultDiv.textContent = '未检测到有效号码！';
-        resultDiv.className = 'error';
-        return;
-      }
-
-      // 取第一个号码作为“平一”
-      let pingYi = numbers[0].padStart(2, '0'); // 补零，如 "2" → "02"
-
-      // 检查是否为有效数字
-      const numValue = parseInt(pingYi, 10);
-      if (isNaN(numValue) || numValue < 1 || numValue > 49) {
-        resultDiv.textContent = `“平一”号码 ${pingYi} 无效！应为 01-49。`;
-        resultDiv.className = 'error';
-        return;
-      }
-
-      // 公式：平一 + 5
-      let resultNum = numValue + 5;
-      if (resultNum > 49) {
-        resultNum = resultNum - 49; // 循环回绕（可选，也可直接报错）
-      }
-      const resultStr = String(resultNum).padStart(2, '0');
-
-      // 查找生肖
-      const shengxiao = shengxiaoMap[resultStr];
-
-      if (shengxiao) {
-        resultDiv.innerHTML = `
-          平一号码：<strong>${pingYi}</strong><br>
-          平一 + 5 = <strong>${resultStr}</strong><br>
-          对应生肖：<strong style="color:#d32f2f;">${shengxiao}</strong>
-        `;
-      } else {
-        resultDiv.textContent = `无法找到数字 ${resultStr} 对应的生肖！`;
-        resultDiv.className = 'error';
-      }
+    // 获取生肖的函数 (1-49)
+    function getZodiac(num) {
+        let remainder = num % 12;
+        if (remainder === 0) remainder = 12;
+        return zodiacMap[remainder];
     }
 
-    // 支持回车键计算
-    document.getElementById('numbers').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        calculate();
-      }
-    });
-  </script>
+    // 判断家野
+    function getHomeWild(zodiac) {
+        const home = ["牛", "马", "羊", "鸡", "狗", "猪"];
+        return home.includes(zodiac) ? "家禽" : "野兽";
+    }
+
+    // 计算合数 (例如 23 -> 2+3=5)
+    function getHeShu(num) {
+        return num.toString().split('').reduce((a, b) => parseInt(a) + parseInt(b), 0);
+    }
+
+    // 判断大小合 (根据图片逻辑推断：合数>=7为大合，否则小合，仅供参考)
+    function getHeSize(num) {
+        let he = getHeShu(num);
+        // 注意：图片中的逻辑可能非常特殊，这里使用通用的合数大小判断
+        // 如果需要完全匹配图片（如8是大合，6是大合），可能需要特定的查表
+        return he >= 7 ? "大合" : "小合";
+    }
+
+    function calculateAll() {
+        const input = document.getElementById('numbers').value;
+        // 处理输入，支持空格和逗号
+        const nums = input.split(/[\s,]+/).map(n => parseInt(n)).filter(n => !isNaN(n));
+
+        if (nums.length < 6) {
+            alert("请至少输入6个号码！");
+            return;
+        }
+
+        const ping1 = nums[0];
+        const ping2 = nums[1];
+        const ping4 = nums[3];
+        const ping5 = nums[4];
+        const ping6 = nums[5];
+
+        let html = '';
+
+        // --- 公式 1: 娃哈哈 (平一 + 5) ---
+        let res1_val = ping1 + 5;
+        let res1_zodiac = getZodiac(res1_val);
+        html += createResultCard("【娃哈哈】平一 + 5 生肖", `${ping1} + 5 = ${res1_val} -> ${res1_zodiac}`);
+
+        // --- 公式 2: 秦可卿 (平二 - 2 大小合) ---
+        let res2_val = ping2 - 2;
+        let res2_he = getHeSize(res2_val);
+        html += createResultCard("【秦可卿】平二 - 2 大小合", `${ping2} - 2 = ${res2_val} (合数${getHeShu(res2_val)}) -> ${res2_he}`);
+
+        // --- 公式 3: 向华强 (平二 - 2 家野) ---
+        let res3_val = ping2 - 2;
+        let res3_zodiac = getZodiac(res3_val);
+        let res3_type = getHomeWild(res3_zodiac);
+        html += createResultCard("【向华强】平二 - 2 家野", `${ping2} - 2 = ${res3_val} -> ${res3_zodiac} (${res3_type})`);
+
+        // --- 公式 4: 猫头鹰 (平四 + 平五 + 6 取六肖) ---
+        let res4_val = ping4 + ping5 + 6;
+        let res4_zodiac = getZodiac(res4_val);
+        // 生成6肖序列
+        const allZodiacs = ["鼠", "猪", "狗", "鸡", "猴", "羊", "马", "蛇", "龙", "兔", "虎", "牛"];
+        let startIndex = allZodiacs.indexOf(res4_zodiac);
+        let sixZodiacs = [];
+        for(let i=0; i<6; i++) {
+            let idx = (startIndex + i) % 12;
+            sixZodiacs.push(allZodiacs[idx]);
+        }
+        html += createResultCard("【猫头鹰】平四+平五+6 取六肖", `${ping4} + ${ping5} + 6 = ${res4_val} -> 起点:${res4_zodiac} [${sixZodiacs.join(',')}]`);
+
+        document.getElementById('results').innerHTML = html;
+    }
+
+    function createResultCard(title, content) {
+        return `
+            <div class="result-card">
+                <div class="result-title">${title}</div>
+                <div class="result-value">${content}</div>
+            </div>
+        `;
+    }
+</script>
+
 </body>
 </html>
