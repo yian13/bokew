@@ -1,113 +1,166 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>蓝奏云直链获取器</title>
-    <style>
-        body { font-family: sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; line-height: 1.6; }
-        input { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; }
-        button { background: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
-        #log { background: #f8f9fa; padding: 15px; border-radius: 4px; margin-top: 20px; white-space: pre-wrap; word-break: break-all; font-size: 14px; border: 1px solid #ddd; }
-        .success { color: #28a745; font-weight: bold; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>六合彩公式计算器 - 平一+5</title>
+  <style>
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #d32f2f;
+    }
+    .input-group {
+      margin: 20px 0;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      font-size: 18px;
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #1565c0;
+    }
+    #result {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #e8f5e9;
+      border-left: 4px solid #4caf50;
+      font-size: 18px;
+      display: none;
+    }
+    .error {
+      background-color: #ffebee;
+      border-left-color: #f44336;
+      color: #c62828;
+    }
+  </style>
 </head>
 <body>
-    <h2>蓝奏云直链解析</h2>
-    <input type="text" id="urlInput" placeholder="请输入蓝奏云链接 (如 https://lanzouv.com/xxx)">
-    <button onclick="startParse()">立即解析</button>
-    <div id="log">等待操作...</div>
+  <h1>六合彩公式计算器</h1>
+  <p style="text-align: center;">公式：平一 + 5 → 查生肖</p>
 
-    <script>
-        const PROXY = "https://cors-anywhere.azm.workers.dev/"; // 这是一个演示用的跨域代理
+  <div class="input-group">
+    <label for="numbers">请输入7个开奖号码（用空格或逗号分隔）：</label>
+    <input type="text" id="numbers" placeholder="例如：25 31 06 33 30 02 27" />
+  </div>
 
-        async function fetchWithProxy(url, options = {}) {
-            return fetch(PROXY + url, options);
-        }
+  <button onclick="calculate()">计算生肖</button>
 
-        // 对应 Python 中的 calc_acw
-        function calcAcw(arg1) {
-            const mask = "3000176000856006061501533003690027800375";
-            const pos = [15, 35, 29, 24, 33, 16, 1, 38, 10, 9, 19, 31, 40, 27, 22, 23, 25, 13, 6, 11, 39, 18, 20, 8, 14, 21, 32, 26, 2, 30, 7, 4, 17, 5, 3, 28, 34, 37, 12, 36];
-            let arg2 = new Array(40).fill("");
-            for (let i = 0; i < 40; i++) {
-                let idx = pos[i] - 1;
-                if (idx < arg1.length) arg2[i] = arg1[idx];
-            }
-            arg2 = arg2.join("");
-            let res = "";
-            for (let i = 0; i < 40; i += 2) {
-                let val = parseInt(arg2.substring(i, i + 2), 16) ^ parseInt(mask.substring(i, i + 2), 16);
-                res += val.toString(16).padStart(2, '0');
-            }
-            return res;
-        }
+  <div id="result"></div>
 
-        async function startParse() {
-            const targetUrl = document.getElementById('urlInput').value;
-            const logBox = document.getElementById('log');
-            if (!targetUrl) return alert("请输入链接");
+  <script>
+    // 标准六合彩生肖对应表（01=鸡）
+    const shengxiaoMap = {
+      '01': '鸡', '02': '狗', '03': '猪',
+      '04': '鼠', '05': '牛', '06': '虎',
+      '07': '兔', '08': '龙', '09': '蛇',
+      '10': '马', '11': '羊', '12': '猴',
+      '13': '鸡', '14': '狗', '15': '猪',
+      '16': '鼠', '17': '牛', '18': '虎',
+      '19': '兔', '20': '龙', '21': '蛇',
+      '22': '马', '23': '羊', '24': '猴',
+      '25': '鸡', '26': '狗', '27': '猪',
+      '28': '鼠', '29': '牛', '30': '虎', // ⚠️ 标准是“虎”
+      '31': '兔', '32': '龙', '33': '蛇',
+      '34': '马', '35': '羊', '36': '猴',
+      '37': '鸡', '38': '狗', '39': '猪',
+      '40': '鼠', '41': '牛', '42': '虎',
+      '43': '兔', '44': '龙', '45': '蛇',
+      '46': '马', '47': '羊', '48': '猴',
+      '49': '鸡'
+    };
 
-            logBox.innerText = "[1] 正在访问分享页...\n";
-            
-            try {
-                let response = await fetchWithProxy(targetUrl);
-                let text = await response.text();
-                let cookies = "";
+    // 如果您坚持 30 对应“牛”，请取消下一行的注释（覆盖上面的值）
+    // shengxiaoMap['30'] = '牛';
 
-                // 处理 acw_sc__v2 绕过
-                if (text.includes("arg1='")) {
-                    logBox.innerText += "[*] 检测到 WAF，正在绕过...\n";
-                    const arg1 = text.match(/arg1\s*=\s*'([^']+)'/)[1];
-                    const acwV2 = calcAcw(arg1);
-                    // 注意：前端 fetch 很难手动完美控制所有 Cookie，这里依赖代理的 Header 传递
-                    response = await fetchWithProxy(targetUrl, {
-                        headers: { 'X-Cors-Set-Cookie': `acw_sc__v2=${acwV2}` }
-                    });
-                    text = await response.text();
-                }
+    function calculate() {
+      const input = document.getElementById('numbers').value.trim();
+      const resultDiv = document.getElementById('result');
+      resultDiv.style.display = 'block';
+      resultDiv.className = '';
 
-                // 提取 iframe
-                const iframeMatch = text.match(/["'](\/fn\?[a-zA-Z0-9_\-=]+)["']/);
-                if (!iframeMatch) throw new Error("未找到 iframe，请检查链接或更换代理。");
-                const iframeUrl = new URL(iframeMatch[1], targetUrl).href;
-                logBox.innerText += `[2] 提取到 iframe: ${iframeUrl}\n`;
+      if (!input) {
+        resultDiv.textContent = '请输入号码！';
+        resultDiv.className = 'error';
+        return;
+      }
 
-                // 提取参数
-                const r2 = await fetchWithProxy(iframeUrl);
-                const text2 = await r2.text();
-                const ajaxData = text2.match(/var\s+ajaxdata\s*=\s*['"](.+?)['"];/)?.[1];
-                const fid = text2.match(/(?:var\s+fid\s*=\s*|file=)(\d{6,})/)?.[1];
-                const wpSign = text2.match(/var\s+wp_sign\s*=\s*['"](.+?)[' text2];/)?.[1];
+      // 支持空格、逗号、中文逗号分隔
+      const numbers = input.split(/[\s,，]+/).filter(n => n !== '');
 
-                if (!ajaxData || !fid) throw new Error("关键参数提取失败。");
+      if (numbers.length < 1) {
+        resultDiv.textContent = '未检测到有效号码！';
+        resultDiv.className = 'error';
+        return;
+      }
 
-                logBox.innerText += `[3] 正在请求直链接口...\n`;
-                const postUrl = `${new URL(iframeUrl).origin}/ajaxm.php?file=${fid}`;
-                
-                const formData = new URLSearchParams();
-                formData.append('action', 'downprocess');
-                formData.append('signs', ajaxData);
-                formData.append('sign', wpSign || "");
-                formData.append('kd', 1);
+      // 取第一个号码作为“平一”
+      let pingYi = numbers[0].padStart(2, '0'); // 补零，如 "2" → "02"
 
-                const res = await fetchWithProxy(postUrl, {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                });
+      // 检查是否为有效数字
+      const numValue = parseInt(pingYi, 10);
+      if (isNaN(numValue) || numValue < 1 || numValue > 49) {
+        resultDiv.textContent = `“平一”号码 ${pingYi} 无效！应为 01-49。`;
+        resultDiv.className = 'error';
+        return;
+      }
 
-                const data = await res.json();
-                if (data.zt === 1) {
-                    const finalLink = `${data.dom}/file/${data.url}`.replace('/file//', '/file/');
-                    logBox.innerHTML += `<hr><span class="success">✅ 解析成功！</span>\n<a href="${finalLink}" target="_blank">点击下载地址</a>\n\n${finalLink}`;
-                } else {
-                    logBox.innerText += `❌ 接口错误: ${JSON.stringify(data)}`;
-                }
+      // 公式：平一 + 5
+      let resultNum = numValue + 5;
+      if (resultNum > 49) {
+        resultNum = resultNum - 49; // 循环回绕（可选，也可直接报错）
+      }
+      const resultStr = String(resultNum).padStart(2, '0');
 
-            } catch (err) {
-                logBox.innerText += `\n❌ 出错了: ${err.message}`;
-            }
-        }
-    </script>
+      // 查找生肖
+      const shengxiao = shengxiaoMap[resultStr];
+
+      if (shengxiao) {
+        resultDiv.innerHTML = `
+          平一号码：<strong>${pingYi}</strong><br>
+          平一 + 5 = <strong>${resultStr}</strong><br>
+          对应生肖：<strong style="color:#d32f2f;">${shengxiao}</strong>
+        `;
+      } else {
+        resultDiv.textContent = `无法找到数字 ${resultStr} 对应的生肖！`;
+        resultDiv.className = 'error';
+      }
+    }
+
+    // 支持回车键计算
+    document.getElementById('numbers').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        calculate();
+      }
+    });
+  </script>
 </body>
 </html>
