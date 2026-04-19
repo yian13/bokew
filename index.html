@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>六合彩民间公式大全（娱乐版）</title>
+    <title>六合彩全公式 · 自动开奖预测</title>
     <style>
         body {
             font-family: 'Microsoft YaHei', sans-serif;
@@ -12,7 +12,7 @@
             color: #333;
         }
         .container {
-            max-width: 650px;
+            max-width: 680px;
             margin: 0 auto;
             background: white;
             border-radius: 12px;
@@ -21,195 +21,191 @@
         }
         h2 {
             text-align: center;
-            color: #c62828;
-            margin-bottom: 20px;
+            color: #c62f2f;
+            margin-bottom: 15px;
         }
-        input {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
+        .status {
+            text-align: center;
+            color: #e65100;
+            font-weight: bold;
             margin: 10px 0;
+            line-height: 1.4;
         }
-        button {
-            width: 100%;
-            padding: 14px;
-            background: #1976d2;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 18px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        button:hover { background: #1565c0; }
         .result {
-            margin: 15px 0;
-            padding: 12px;
+            margin: 12px 0;
+            padding: 10px;
             background: #f0f9ff;
             border-left: 4px solid #0288d1;
             border-radius: 0 6px 6px 0;
+            font-size: 14px;
         }
-        .title {
-            font-weight: bold;
-            color: #0277bd;
-            margin-bottom: 4px;
+        .title { font-weight: bold; color: #0277bd; }
+        .value { color: #d32f2f; font-weight: bold; }
+        .actual {
+            background: #e8f5e9 !important;
+            border-left-color: #388e3c !important;
         }
-        .value {
-            color: #d32f2f;
+        .section-title {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px dashed #ddd;
             font-weight: bold;
+            color: #5d4037;
         }
         .warning {
             background: #fff8e1;
             padding: 12px;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 12px;
             color: #e65100;
             margin-top: 20px;
             line-height: 1.5;
-        }
-        .section {
-            margin-top: 25px;
-            padding-top: 15px;
-            border-top: 1px dashed #eee;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>六合彩民间公式大全（娱乐模拟）</h2>
-    <input type="text" id="nums" placeholder="输入6个正码（或7个含特码），如：25 31 06 33 30 02">
-
-    <button onclick="runAll()">🚀 一键运行全部公式</button>
-
+    <h2>六合彩全公式 · 自动开奖预测</h2>
+    <div class="status" id="status">🔄 正在获取最新开奖数据...</div>
     <div id="output"></div>
 
     <div class="warning">
-        ⚠️ 重要提示：<br>
-        • 六合彩开奖为完全随机事件，所有“公式”均无科学依据。<br>
-        • 本工具仅用于娱乐、编程学习或反赌警示教育。<br>
-        • 彩票长期期望收益为负，请勿沉迷，理性对待。
+        ⚠️ 数据来源：<a href="https://macaumarksix.com" target="_blank">macaumarksix.com</a><br>
+        • 所有“公式”仅为民间娱乐模拟，**无科学依据**。<br>
+        • 彩票为独立随机事件，长期参与必亏，请理性对待。
     </div>
 </div>
 
 <script>
-// ====== 基础数据 ======
-const ZODIAC_LIST = ["鼠","牛","虎","兔","龙","蛇","马","羊","猴","鸡","狗","猪"];
-const ZODIAC_MAP = {};
-for (let i = 0; i < ZODIAC_LIST.length; i++) {
-    ZODIAC_MAP[i + 1] = ZODIAC_LIST[i];
-}
+// ====== 配置 ======
+const API_URL = "https://macaumarksix.com/api/macaujc3.com";
+const PROXY = "https://corsproxy.io/?";
+const FULL_URL = PROXY + encodeURIComponent(API_URL);
 
-// 波色规则（按尾数）：0/5=红, 1/6=蓝, 2/7=绿, 3/8=红, 4/9=蓝
+// 生肖与波色规则
+const ZODIAC_LIST = ["鼠","牛","虎","兔","龙","蛇","马","羊","猴","鸡","狗","猪"];
 const COLOR_BY_TAIL = {0:'红',1:'蓝',2:'绿',3:'红',4:'蓝',5:'红',6:'蓝',7:'绿',8:'红',9:'蓝'};
 const HOME_ANIMALS = new Set(["牛","马","羊","鸡","狗","猪"]);
 
 // 工具函数
-function getZodiac(num) {
-    if (num <= 0) num = 1;
-    let idx = ((num - 1) % 12);
-    return ZODIAC_LIST[idx];
-}
-function isHome(z) { return HOME_ANIMALS.has(z); }
-function getTail(n) { return n % 10; }
-function getColor(n) { return COLOR_BY_TAIL[getTail(n)]; }
-function heShu(n) { return String(n).split('').reduce((a,b)=>a+parseInt(b),0); }
-function mod49(x) { return ((x - 1) % 49) + 1; }
+const getZodiac = (num) => ZODIAC_LIST[((num - 1) % 12 + 12) % 12];
+const isHome = (z) => HOME_ANIMALS.has(z);
+const getTail = (n) => n % 10;
+const getColor = (n) => COLOR_BY_TAIL[getTail(n)];
+const heShu = (n) => String(n).split('').reduce((a,b)=>a+parseInt(b),0);
+const mod49 = (x) => ((x - 1) % 49) + 1;
 
 // ====== 主函数 ======
-function runAll() {
-    const input = document.getElementById('nums').value.trim();
-    if (!input) return alert("请输入号码！");
-    let arr = input.split(/[\s,，]+/).map(x => parseInt(x)).filter(x => !isNaN(x) && x >= 1 && x <= 49);
-    if (arr.length < 6) return alert("至少需要6个正码！");
+async function fetchAndRun() {
+    const statusEl = document.getElementById('status');
+    try {
+        statusEl.textContent = "📡 请求开奖数据...";
+        const res = await fetch(FULL_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        
+        const data = await res.json();
+        if (!data || !Array.isArray(data) || !data[0]?.data?.[0]) {
+            throw new Error("数据格式异常");
+        }
 
-    const [p1, p2, p3, p4, p5, p6] = arr;
-    const nums6 = [p1, p2, p3, p4, p5, p6];
-    const sum6 = nums6.reduce((a,b)=>a+b,0);
-    const min6 = Math.min(...nums6);
-    const max6 = Math.max(...nums6);
-    const span = max6 - min6;
+        const latest = data[0].data[0];
+        const numbers = latest.openCode.split(',').map(x => parseInt(x.trim()));
+        const [p1, p2, p3, p4, p5, p6, actualTeMa] = numbers;
+        const nums6 = [p1, p2, p3, p4, p5, p6];
+        const sum6 = nums6.reduce((a,b)=>a+b,0);
+        const min6 = Math.min(...nums6);
+        const max6 = Math.max(...nums6);
+        const span = max6 - min6;
 
-    let out = "";
+        statusEl.innerHTML = `✅ 期号 ${latest.expect}（${latest.openTime}）<br>开奖号码：<strong>${latest.openCode}</strong>`;
 
-    // ---------- 第一部分：经典人物公式 ----------
-    out += `<div class="section"><strong>📌 经典人物公式</strong></div>`;
+        let out = "";
 
-    // 【娃哈哈】平一+5 → 生肖
-    let v_wahaha = p1 + 5;
-    out += `<div class="result"><div class="title">【娃哈哈】平一 + 5 → 生肖</div><div class="value">${p1} + 5 = ${v_wahaha} → ${getZodiac(v_wahaha)}</div></div>`;
+        // ========== 第一部分：经典人物公式 ==========
+        out += `<div class="section-title">📌 经典人物公式（预测下期）</div>`;
 
-    // 【向华强】平二-2 → 家野
-    let v_xiang = p2 - 2;
-    let z_xiang = getZodiac(v_xiang);
-    out += `<div class="result"><div class="title">【向华强】平二 - 2 → 家野</div><div class="value">${p2} - 2 = ${v_xiang} → ${z_xiang}（${isHome(z_xiang) ? '家禽' : '野兽'}）</div></div>`;
+        // 【娃哈哈】平一+5 → 生肖
+        let v_wahaha = p1 + 5;
+        out += `<div class="result"><div class="title">【娃哈哈】平一 + 5 → 生肖</div><div class="value">${p1} + 5 = ${v_wahaha} → ${getZodiac(v_wahaha)}</div></div>`;
 
-    // 【秦可卿】平二-2 → 大小合
-    let hs_qin = heShu(v_xiang);
-    let heSize = hs_qin >= 7 ? "大合" : "小合";
-    out += `<div class="result"><div class="title">【秦可卿】平二 - 2 → 大小合</div><div class="value">${p2} - 2 = ${v_xiang}（合数${hs_qin}）→ ${heSize}</div></div>`;
+        // 【向华强】平二-2 → 家野
+        let v_xiang = p2 - 2;
+        let z_xiang = getZodiac(v_xiang);
+        out += `<div class="result"><div class="title">【向华强】平二 - 2 → 家野</div><div class="value">${p2} - 2 = ${v_xiang} → ${z_xiang}（${isHome(z_xiang) ? '家禽' : '野兽'}）</div></div>`;
 
-    // 【猫头鹰】平四+平五+6 → 六肖
-    let v_mao = p4 + p5 + 6;
-    let startZ = getZodiac(v_mao);
-    let idx = ZODIAC_LIST.indexOf(startZ);
-    let sixZ = [];
-    for (let i = 0; i < 6; i++) sixZ.push(ZODIAC_LIST[(idx + i) % 12]);
-    out += `<div class="result"><div class="title">【猫头鹰】平四+平五+6 → 六肖</div><div class="value">${p4}+${p5}+6=${v_mao} → 起点${startZ} → [${sixZ.join(', ')}]</div></div>`;
+        // 【秦可卿】平二-2 → 大小合
+        let hs_qin = heShu(v_xiang);
+        let heSize = hs_qin >= 7 ? "大合" : "小合";
+        out += `<div class="result"><div class="title">【秦可卿】平二 - 2 → 大小合</div><div class="value">${p2} - 2 = ${v_xiang}（合数${hs_qin}）→ ${heSize}</div></div>`;
 
-    // 【玄武指特】预测特码
-    let s_xuanwu = p1 + p4 + p6;
-    let t_xuanwu = s_xuanwu * 3;
-    let teMa_xuanwu = mod49(t_xuanwu);
-    out += `<div class="result"><div class="title">【玄武指特】→ 预测特码</div><div class="value">(${p1}+${p4}+${p6})×3 = ${t_xuanwu} → 特码预测：<strong>${teMa_xuanwu}</strong></div></div>`;
+        // 【猫头鹰】平四+平五+6 → 六肖
+        let v_mao = p4 + p5 + 6;
+        let startZ = getZodiac(v_mao);
+        let idx = ZODIAC_LIST.indexOf(startZ);
+        let sixZ = Array.from({length:6}, (_,i) => ZODIAC_LIST[(idx+i)%12]);
+        out += `<div class="result"><div class="title">【猫头鹰】平四+平五+6 → 六肖</div><div class="value">${p4}+${p5}+6=${v_mao} → 起点${startZ} → [${sixZ.join(', ')}]</div></div>`;
 
-    // ---------- 第二部分：尾数类 ----------
-    out += `<div class="section"><strong>🔢 尾数类公式</strong></div>`;
+        // 【玄武指特】预测特码
+        let s_xuanwu = p1 + p4 + p6;
+        let t_xuanwu = s_xuanwu * 3;
+        let predTeMa = mod49(t_xuanwu);
+        out += `<div class="result"><div class="title">【玄武指特】→ 预测下期特码</div><div class="value">(${p1}+${p4}+${p6})×3 = ${t_xuanwu} → <strong>${predTeMa}</strong></div></div>`;
 
-    let tail1 = getTail(p1), tail6 = getTail(p6);
-    let predTail = (tail1 + tail6) % 10;
-    out += `<div class="result"><div class="title">【尾数和】平一尾+平六尾 → 特码尾</div><div class="value">${tail1} + ${tail6} = ${tail1+tail6} → 尾数 ${predTail}（如0${predTail},1${predTail}...）</div></div>`;
+        // ========== 第二部分：尾数与和值 ==========
+        out += `<div class="section-title">🔢 尾数与和值类</div>`;
 
-    let sumTail = getTail(sum6);
-    out += `<div class="result"><div class="title">【和值尾】6码总和尾 → 特码尾</div><div class="value">总和 ${sum6} → 尾 ${sumTail}</div></div>`;
+        let tailPred1 = (getTail(p1) + getTail(p6)) % 10;
+        out += `<div class="result"><div class="title">【尾数和】平一尾+平六尾 → 特码尾</div><div class="value">${getTail(p1)} + ${getTail(p6)} = ${getTail(p1)+getTail(p6)} → 尾 ${tailPred1}</div></div>`;
 
-    // ---------- 第三部分：生肖与六肖 ----------
-    out += `<div class="section"><strong>🐉 生肖与六肖</strong></div>`;
+        let sumTail = getTail(sum6);
+        out += `<div class="result"><div class="title">【和值尾】6码总和尾 → 特码尾</div><div class="value">总和 ${sum6} → 尾 ${sumTail}</div></div>`;
 
-    let z_p3 = getZodiac(p3);
-    out += `<div class="result"><div class="title">【平三定肖】平三 → 生肖</div><div class="value">平三 = ${p3} → ${z_p3}</div></div>`;
+        // ========== 第三部分：生肖与六肖 ==========
+        out += `<div class="section-title">🐉 生肖与六肖</div>`;
 
-    let diff = p5 - p2;
-    let z_diff = getZodiac(diff);
-    let idx2 = ZODIAC_LIST.indexOf(z_diff);
-    let sixZ2 = [];
-    for (let i = 0; i < 6; i++) sixZ2.push(ZODIAC_LIST[(idx2 + i) % 12]);
-    out += `<div class="result"><div class="title">【六肖连环】平五 - 平二 → 六肖</div><div class="value">${p5} - ${p2} = ${diff} → 起点${z_diff} → [${sixZ2.join(', ')}]</div></div>`;
+        let diff = p5 - p2;
+        let z_diff = getZodiac(diff);
+        let idx2 = ZODIAC_LIST.indexOf(z_diff);
+        let sixZ2 = Array.from({length:6}, (_,i) => ZODIAC_LIST[(idx2+i)%12]);
+        out += `<div class="result"><div class="title">【六肖连环】平五 - 平二 → 六肖</div><div class="value">${p5} - ${p2} = ${diff} → 起点${z_diff} → [${sixZ2.join(', ')}]</div></div>`;
 
-    // ---------- 第四部分：波色与单双 ----------
-    out += `<div class="section"><strong>🔴🔵🟢 波色与单双</strong></div>`;
+        // ========== 第四部分：波色与单双 ==========
+        out += `<div class="section-title">🔴🔵🟢 波色与单双</div>`;
 
-    let color_tema = getColor(p6); // 假设用平六代表趋势
-    out += `<div class="result"><div class="title">【波色轮转】平六波色 → 下期参考</div><div class="value">平六 ${p6} → ${color_tema}色</div></div>`;
+        let colorRef = getColor(p6);
+        out += `<div class="result"><div class="title">【波色参考】平六波色</div><div class="value">平六 ${p6} → ${colorRef}色</div></div>`;
 
-    let danShuang = (span % 2 === 1) ? "单" : "双";
-    out += `<div class="result"><div class="title">【跨度定单双】跨度 = 最大-最小</div><div class="value">跨度 ${span}（${span%2===1?'奇':'偶'}）→ 特码可能为<strong>${danShuang}</strong></div></div>`;
+        let danShuang = (span % 2 === 1) ? "单" : "双";
+        out += `<div class="result"><div class="title">【跨度定单双】跨度 = 最大-最小</div><div class="value">跨度 ${span}（${span%2===1?'奇':'偶'}）→ 特码可能为<strong>${danShuang}</strong></div></div>`;
 
-    // ---------- 第五部分：玄学提示（非计算） ----------
-    out += `<div class="section"><strong>🔮 玄学提示（仅供参考）</strong></div>`;
+        // ========== 第五部分：本期实际结果（用于对比） ==========
+        out += `<div class="section-title">🎯 本期实际特码（供验证）</div>`;
+        out += `<div class="result actual">
+            <div class="title">本期特码：${actualTeMa}</div>
+            <div class="value">
+                生肖：${getZodiac(actualTeMa)} | 
+                波色：${getColor(actualTeMa)} | 
+                ${actualTeMa % 2 === 1 ? '单' : '双'} | 
+                合数：${heShu(actualTeMa)}
+            </div>
+        </div>`;
 
-    out += `<div class="result"><div class="title">【冷热号提醒】</div><div class="value">注意：所谓“冷号必出”是赌徒谬误！每个号码概率恒为1/49。</div></div>`;
+        // ========== 第六部分：玄学提示 ==========
+        out += `<div class="section-title">🔮 玄学提醒</div>`;
+        out += `<div class="result"><div class="value">• “冷号必出”是赌徒谬误！每个号码概率恒为 1/49。<br>• 节日、谐音、五行等与开奖无关，纯属心理暗示。</div></div>`;
 
-    out += `<div class="result"><div class="title">【节日谐音】</div><div class="value">春节喜“8”，七夕爱“7”，但开奖与日期无关——纯属巧合。</div></div>`;
+        document.getElementById('output').innerHTML = out;
 
-    // 输出
-    document.getElementById('output').innerHTML = out;
+    } catch (err) {
+        console.error("Error:", err);
+        statusEl.innerHTML = `❌ 获取失败：${err.message}<br>请刷新重试，或检查网络。`;
+    }
 }
+
+// 页面加载时自动执行
+window.addEventListener('load', fetchAndRun);
 </script>
 
 </body>
 </html>
-
