@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>六合彩分析 · 特码/平码/三中三推荐</title>
+  <title>六合彩预测 · 生肖+号码推荐</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     :root {
@@ -68,13 +68,9 @@
       flex: 1 1 300px; background: #fafbfc; border-radius: var(--radius);
       padding: 14px; box-shadow: var(--shadow);
     }
-    /* 表格优化：完全适应手机，无横向滚动 */
-    .table-responsive {
-      width: 100%; overflow-x: visible; margin-bottom: 12px;
-    }
+    .table-responsive { width: 100%; overflow-x: visible; margin-bottom: 12px; }
     table {
-      width: 100%; border-collapse: collapse; font-size: 0.82rem;
-      table-layout: auto;
+      width: 100%; border-collapse: collapse; font-size: 0.82rem; table-layout: auto;
     }
     th, td {
       padding: 8px 4px; text-align: center; border-bottom: 1px solid #eee;
@@ -84,23 +80,25 @@
       background: var(--primary); color: white; font-weight: 600;
       position: sticky; top: 0; z-index: 2;
     }
-    td:first-child, th:first-child { padding-left: 6px; }
-    td:last-child, th:last-child { padding-right: 6px; }
-
     .badge {
       display: inline-block; padding: 2px 8px; border-radius: 12px;
       font-weight: 600; font-size: 0.7rem; color: white; line-height: 1.4;
     }
-    .hot { background: var(--danger); }
-    .warm { background: var(--warning); }
-    .cold { background: var(--info); }
-
-    .chart-wrap {
-      position: relative; height: 280px; width: 100%; margin: 12px 0;
-    }
+    .hot { background: var(--danger); } .warm { background: var(--warning); } .cold { background: var(--info); }
+    .chart-wrap { position: relative; height: 280px; width: 100%; margin: 12px 0; }
     .recommend-box {
       background: #fff8e1; border: 2px solid #ffb300; border-radius: 20px;
       padding: 18px; margin-top: 18px; text-align: center;
+    }
+    .rec-title { font-size: 1.2rem; font-weight: 700; color: #e65100; margin-bottom: 12px; }
+    .rec-items {
+      display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin: 10px 0;
+    }
+    .rec-badge {
+      background: white; border-radius: 20px; padding: 10px 22px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      font-weight: 700; font-size: 1.2rem; color: #b71c1c;
+      border-left: 6px solid var(--danger);
     }
     .number-circles {
       display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin: 16px 0;
@@ -131,9 +129,8 @@
   </style>
 </head>
 <body>
-  <h1>🐲 六合彩分析工具</h1>
+  <h1>🐲 六合彩预测 · 生肖+号码推荐</h1>
 
-  <!-- 数据加载卡片 -->
   <div class="card">
     <div class="actions">
       <input type="file" id="csvFile" accept="text/csv,.csv,text/plain" style="display:none;">
@@ -152,67 +149,26 @@
       <span style="font-size:0.8rem;color:#666;">（0=所有期）</span>
     </div>
     <div style="display:flex; gap:12px; flex-wrap:wrap;">
-      <button class="btn btn-danger" id="analyzeBtn">🔍 开始生肖分析</button>
-      <button class="btn btn-warning" id="recommendBtn">🎰 推荐三中三</button>
-      <button class="btn" id="specialNumBtn">🎯 特码号码分析</button>
+      <button class="btn btn-danger" id="analyzeBtn">🔍 生肖分析+推荐</button>
+      <button class="btn btn-warning" id="recommendBtn">🎰 三中三推荐</button>
+      <button class="btn" id="specialNumBtn">🎯 特码号码分析+推荐</button>
     </div>
   </div>
 
-  <!-- 生肖分析结果区 -->
-  <div id="zodiacResult" style="display:none;">
-    <div class="grid-2col">
-      <div class="col">
-        <div class="section-title">🎯 特码生肖</div>
-        <div class="table-responsive">
-          <table id="specialTable">
-            <thead><tr><th>生肖</th><th>次数</th><th>概率</th><th>状态</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div class="chart-wrap"><canvas id="specialChart"></canvas></div>
-      </div>
-      <div class="col">
-        <div class="section-title">🔄 平码生肖</div>
-        <div class="table-responsive">
-          <table id="normalTable">
-            <thead><tr><th>生肖</th><th>次数</th><th>概率</th><th>状态</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div class="chart-wrap"><canvas id="normalChart"></canvas></div>
-      </div>
-    </div>
-  </div>
+  <!-- 生肖分析结果区（含推荐） -->
+  <div id="zodiacResult" style="display:none;"></div>
 
   <!-- 三中三推荐区 -->
-  <div id="recommendArea" style="display:none;">
-    <div class="card recommend-box">
-      <h2 style="color:#f57f17;">🎯 本期三中三推荐号码</h2>
-      <div class="number-circles" id="recommendNumbers"></div>
-      <p style="font-weight:500;">算法：平码总次数 + 近30期热度 – 遗漏值</p>
-    </div>
-  </div>
+  <div id="recommendArea" style="display:none;"></div>
 
-  <!-- 特码号码分析区 -->
-  <div id="specialNumArea" style="display:none;">
-    <div class="card">
-      <div class="section-title">🔢 特码号码频次分析（基于全部历史）</div>
-      <p style="font-size:0.85rem;color:#555;margin-bottom:12px;">统计每个特码号码的出现次数、概率与冷热状态。</p>
-      <div class="table-responsive">
-        <table id="specialNumTable">
-          <thead><tr><th>号码</th><th>次数</th><th>概率</th><th>状态</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div class="chart-wrap"><canvas id="specialNumChart"></canvas></div>
-    </div>
-  </div>
+  <!-- 特码号码分析+推荐区 -->
+  <div id="specialNumArea" style="display:none;"></div>
 
   <!-- 粘贴模态框 -->
   <div class="modal" id="pasteModal">
     <div class="modal-content">
       <h3>📋 粘贴 CSV 文本</h3>
-      <p style="font-size:0.8rem; color:#666; margin-bottom:8px;">格式：period,numbers,zodiac<br>示例：20260507114,"17,34,35,18,01,44,10","虎,雞,猴,牛,馬,豬,雞"</p>
+      <p style="font-size:0.8rem;color:#666;margin-bottom:8px;">格式：period,numbers,zodiac<br>示例：20260507114,"17,34,35,18,01,44,10","虎,雞,猴,牛,馬,豬,雞"</p>
       <textarea id="csvTextarea" placeholder="在此粘贴CSV内容..."></textarea>
       <div class="modal-actions">
         <button class="btn btn-outline" id="cancelPaste">取消</button>
@@ -224,17 +180,13 @@
   <script>
     (function() {
       const ZODIAC = ['鼠','牛','虎','兔','龍','蛇','馬','羊','猴','雞','狗','豬'];
-      // 全局数据
       let fullDataCache = null;
-
-      // Chart 实例
       let charts = {};
 
       function destroyChart(key) {
         if (charts[key]) { charts[key].destroy(); charts[key] = null; }
       }
 
-      // CSV 解析
       function parseCSVLine(line) {
         const result = [];
         let cur = '', inQ = false;
@@ -285,7 +237,6 @@
         }
       }
 
-      // 文件选择
       document.getElementById('csvFile').addEventListener('change', e => {
         const file = e.target.files[0];
         if (!file) return;
@@ -296,7 +247,6 @@
         reader.readAsText(file, 'UTF-8');
       });
 
-      // 粘贴功能
       const pasteModal = document.getElementById('pasteModal');
       document.getElementById('pasteBtn').addEventListener('click', () => { pasteModal.style.display = 'flex'; });
       document.getElementById('cancelPaste').addEventListener('click', () => { pasteModal.style.display = 'none'; });
@@ -309,7 +259,6 @@
         document.getElementById('csvTextarea').value = '';
       });
 
-      // 通用排序
       function sortData(data) {
         return [...data].sort((a,b) => {
           const na = parseInt(a.period.replace(/\D/g,'')) || 0;
@@ -318,8 +267,7 @@
         });
       }
 
-      // 冷热度分类
-      function classifyHotCold(arr, countKey = 'count') {
+      function classifyHotCold(arr, countKey='count') {
         const values = arr.map(i => i[countKey]);
         const n = values.length;
         const mean = values.reduce((a,b)=>a+b,0)/n;
@@ -354,7 +302,7 @@
         });
       }
 
-      function drawBarChart(canvasId, labels, values, label = '次数') {
+      function drawBarChart(canvasId, labels, values, label='次数') {
         destroyChart(canvasId);
         const ctx = document.getElementById(canvasId).getContext('2d');
         charts[canvasId] = new Chart(ctx, {
@@ -379,7 +327,6 @@
         });
       }
 
-      // 获取过滤数据
       function getFilteredData() {
         if (!fullDataCache || fullDataCache.length === 0) {
           alert('请先加载 CSV 数据');
@@ -391,72 +338,163 @@
         return recent > 0 ? sorted.slice(-recent) : sorted;
       }
 
-      // ============= 生肖分析 =============
+      // ---------- 推荐算法核心：综合频率+遗漏 ----------
+      function computeRecommendScores(statsList, countKey, totalSlots, dataArray, type='zodiac') {
+        // statsList: 每个元素包含 count 和概率信息
+        // 计算每个条目的加权分数：总出现次数权重0.4 + 近30期出现次数权重0.4 - 遗漏值权重0.2
+        const result = statsList.map(item => {
+          const totalCount = item[countKey];
+          // 获取近30期出现次数和遗漏（需要从原始数据提取）
+          const recentCount = item.recentCount || 0;
+          const missing = item.missing || 0;
+          const score = totalCount * 0.4 + recentCount * 0.4 - missing * 0.2;
+          return { ...item, score: Math.round(score * 100) / 100 };
+        });
+        result.sort((a,b) => b.score - a.score);
+        return result.slice(0, 3);
+      }
+
+      function computeZodiacMissingAndRecent(data, spIdx, type) {
+        const zodiacMap = {};
+        ZODIAC.forEach(z => { zodiacMap[z] = { count:0, recentCount:0, missing:0 }; });
+        const total = data.length;
+        // 统计所有期
+        data.forEach(row => {
+          const z = row.zodiac;
+          if (type === 'special') {
+            const sz = z[spIdx];
+            zodiacMap[sz].count++;
+          } else {
+            z.forEach((s, i) => {
+              if (i === spIdx) return;
+              zodiacMap[s].count++;
+            });
+          }
+        });
+        // 计算遗漏（从最后一期往前连续缺失的期数）
+        const lastN = data.length;
+        for (let z of ZODIAC) {
+          let miss = 0;
+          for (let i = data.length - 1; i >= 0; i--) {
+            const row = data[i];
+            const present = type === 'special' ? row.zodiac[spIdx] === z : row.zodiac.some((s, idx) => idx !== spIdx && s === z);
+            if (present) break;
+            miss++;
+          }
+          zodiacMap[z].missing = miss;
+        }
+        // 近30期出现次数
+        const recentData = data.slice(-30);
+        recentData.forEach(row => {
+          const z = row.zodiac;
+          if (type === 'special') {
+            const sz = z[spIdx];
+            if (zodiacMap[sz]) zodiacMap[sz].recentCount++;
+          } else {
+            z.forEach((s, i) => {
+              if (i === spIdx) return;
+              if (zodiacMap[s]) zodiacMap[s].recentCount++;
+            });
+          }
+        });
+        // 构建数组
+        return ZODIAC.map(z => ({
+          zodiac: z,
+          count: zodiacMap[z].count,
+          recentCount: zodiacMap[z].recentCount,
+          missing: zodiacMap[z].missing,
+          probability: type === 'special' ? (total ? (zodiacMap[z].count/total*100).toFixed(2) : 0)
+                      : (total*6 ? (zodiacMap[z].count/(total*6)*100).toFixed(2) : 0)
+        }));
+      }
+
+      // ========== 生肖分析+推荐 ==========
       document.getElementById('analyzeBtn').addEventListener('click', () => {
         const data = getFilteredData();
         if (!data) return;
-        const specialPos = document.getElementById('specialPos').value;
-        const spIdx = specialPos === 'first' ? 0 : 6;
+        const spIdx = document.getElementById('specialPos').value === 'first' ? 0 : 6;
 
-        const specMap = {}, normMap = {};
-        data.forEach(row => {
-          const z = row.zodiac;
-          specMap[z[spIdx]] = (specMap[z[spIdx]] || 0) + 1;
-          z.forEach((s, i) => {
-            if (i === spIdx) return;
-            normMap[s] = (normMap[s] || 0) + 1;
-          });
-        });
-
-        const total = data.length;
-        let specStats = ZODIAC.map(z => ({
-          zodiac: z,
-          count: specMap[z] || 0,
-          probability: total ? ((specMap[z]||0)/total*100).toFixed(2) : 0
-        }));
-        const normalSlots = total * 6;
-        let normStats = ZODIAC.map(z => ({
-          zodiac: z,
-          count: normMap[z] || 0,
-          probability: normalSlots ? ((normMap[z]||0)/normalSlots*100).toFixed(2) : 0
-        }));
-
-        specStats = classifyHotCold(specStats);
-        normStats = classifyHotCold(normStats);
-
-        // 按次数降序表格
+        // 特码生肖统计
+        const specStatsRaw = computeZodiacMissingAndRecent(data, spIdx, 'special');
+        const specStats = classifyHotCold(specStatsRaw);
         specStats.sort((a,b) => b.count - a.count);
+
+        // 平码生肖统计
+        const normStatsRaw = computeZodiacMissingAndRecent(data, spIdx, 'normal');
+        const normStats = classifyHotCold(normStatsRaw);
         normStats.sort((a,b) => b.count - a.count);
 
+        // 推荐特码生肖（综合得分前3）
+        const specRec = computeRecommendScores(specStatsRaw, 'count', data.length, data, 'special');
+        // 推荐平码生肖
+        const normRec = computeRecommendScores(normStatsRaw, 'count', data.length*6, data, 'normal');
+
+        // 构建结果 HTML
+        const container = document.getElementById('zodiacResult');
+        container.innerHTML = `
+          <div class="grid-2col">
+            <div class="col">
+              <div class="section-title">🎯 特码生肖统计</div>
+              <div class="table-responsive">
+                <table id="specialTable">
+                  <thead><tr><th>生肖</th><th>次数</th><th>概率</th><th>状态</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+              <div class="chart-wrap"><canvas id="specialChart"></canvas></div>
+            </div>
+            <div class="col">
+              <div class="section-title">🔄 平码生肖统计</div>
+              <div class="table-responsive">
+                <table id="normalTable">
+                  <thead><tr><th>生肖</th><th>次数</th><th>概率</th><th>状态</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+              <div class="chart-wrap"><canvas id="normalChart"></canvas></div>
+            </div>
+          </div>
+          <div class="card recommend-box">
+            <div class="rec-title">🔥 本期生肖推荐（基于频率+遗漏）</div>
+            <p style="margin-bottom:8px; font-weight:500;">特码生肖推荐：${specRec.map(s => s.zodiac).join('、')}</p>
+            <div class="rec-items">
+              ${specRec.map(s => `<div class="rec-badge">${s.zodiac} (得分${s.score})</div>`).join('')}
+            </div>
+            <p style="margin-bottom:8px; font-weight:500; margin-top:16px;">平码生肖推荐：${normRec.map(s => s.zodiac).join('、')}</p>
+            <div class="rec-items">
+              ${normRec.map(s => `<div class="rec-badge">${s.zodiac} (得分${s.score})</div>`).join('')}
+            </div>
+            <p style="font-size:0.75rem; color:#888; margin-top:8px;">* 得分越高，开出概率越大（综合总次数、近30期热度与遗漏值）</p>
+          </div>
+        `;
+        container.style.display = 'block';
+        document.getElementById('recommendArea').style.display = 'none';
+        document.getElementById('specialNumArea').style.display = 'none';
+
+        // 填充表格和图表
         renderTable('specialTable', specStats, ['zodiac','count','probability','status']);
         renderTable('normalTable', normStats, ['zodiac','count','probability','status']);
-
-        // 图表按生肖顺序
         const specChartData = ZODIAC.map(z => specStats.find(s => s.zodiac === z) || {count:0});
         const normChartData = ZODIAC.map(z => normStats.find(s => s.zodiac === z) || {count:0});
         drawBarChart('specialChart', ZODIAC, specChartData.map(s => s.count));
         drawBarChart('normalChart', ZODIAC, normChartData.map(s => s.count));
-
-        document.getElementById('zodiacResult').style.display = 'block';
-        document.getElementById('recommendArea').style.display = 'none';
-        document.getElementById('specialNumArea').style.display = 'none';
       });
 
-      // ============= 三中三推荐 =============
+      // ========== 三中三推荐（平码号码） ==========
       document.getElementById('recommendBtn').addEventListener('click', () => {
         if (!fullDataCache || fullDataCache.length === 0) {
           alert('请先加载数据');
           return;
         }
         const sorted = sortData(fullDataCache);
-        const specialIdx = 6; // 默认最后一个为特码
+        const spIdx = 6; // 默认最后一个为特码
         const freq = new Array(50).fill(0);
         const draws = [];
         sorted.forEach(row => {
           const nums = row.numbers.map(n => parseInt(n,10));
           const normal = [];
           nums.forEach((num, i) => {
-            if (i === specialIdx) return;
+            if (i === spIdx) return;
             if (num >= 1 && num <= 49) { freq[num]++; normal.push(num); }
           });
           draws.push(normal);
@@ -480,55 +518,109 @@
         const scores = [];
         for (let num=1; num<=49; num++) {
           const score = freq[num]*0.5 + recent30[num]*2 - absent[num]*0.3;
-          scores.push({ number: num, score });
+          scores.push({ number: num, score: Math.round(score*100)/100 });
         }
         scores.sort((a,b) => b.score - a.score);
         const top3 = scores.slice(0,3).map(i => i.number.toString().padStart(2,'0'));
-        document.getElementById('recommendNumbers').innerHTML = top3.map(n => `<div class="num-circle">${n}</div>`).join('');
+
+        document.getElementById('recommendArea').innerHTML = `
+          <div class="card recommend-box">
+            <h2 style="color:#f57f17;">🎯 本期三中三推荐号码</h2>
+            <div class="number-circles">${top3.map(n => `<div class="num-circle">${n}</div>`).join('')}</div>
+            <p style="font-weight:500;">算法：平码总次数 + 近30期热度 – 遗漏值</p>
+          </div>
+        `;
         document.getElementById('recommendArea').style.display = 'block';
         document.getElementById('zodiacResult').style.display = 'none';
         document.getElementById('specialNumArea').style.display = 'none';
       });
 
-      // ============= 特码号码分析 =============
+      // ========== 特码号码分析+推荐 ==========
       document.getElementById('specialNumBtn').addEventListener('click', () => {
         if (!fullDataCache || fullDataCache.length === 0) {
           alert('请先加载数据');
           return;
         }
         const sorted = sortData(fullDataCache);
-        const specialPos = document.getElementById('specialPos').value;
-        const spIdx = specialPos === 'first' ? 0 : 6;
-
+        const spIdx = document.getElementById('specialPos').value === 'first' ? 0 : 6;
         const countMap = new Array(50).fill(0);
+        const recentMap = new Array(50).fill(0);
+        const missingMap = new Array(50).fill(0);
+        const total = sorted.length;
+
         sorted.forEach(row => {
           const num = parseInt(row.numbers[spIdx], 10);
           if (num >= 1 && num <= 49) countMap[num]++;
         });
 
-        const total = sorted.length;
+        // 遗漏计算
+        for (let n=1; n<=49; n++) {
+          let miss = 0;
+          for (let i = sorted.length-1; i >= 0; i--) {
+            if (parseInt(sorted[i].numbers[spIdx],10) === n) break;
+            miss++;
+          }
+          missingMap[n] = miss;
+        }
+        // 近30期
+        const recentData = sorted.slice(-30);
+        recentData.forEach(row => {
+          const num = parseInt(row.numbers[spIdx],10);
+          if (num >= 1 && num <= 49) recentMap[num]++;
+        });
+
         let stats = [];
-        for (let i = 1; i <= 49; i++) {
+        for (let i=1; i<=49; i++) {
           stats.push({
             number: i.toString().padStart(2,'0'),
             count: countMap[i],
-            probability: total ? (countMap[i]/total*100).toFixed(2) : 0
+            probability: total ? (countMap[i]/total*100).toFixed(2) : 0,
+            recentCount: recentMap[i],
+            missing: missingMap[i]
           });
         }
         stats = classifyHotCold(stats);
         stats.sort((a,b) => b.count - a.count);
 
+        // 特码号码推荐算法
+        const recCandidates = stats.map(item => ({
+          ...item,
+          score: item.count * 0.4 + item.recentCount * 0.4 - item.missing * 0.2
+        }));
+        recCandidates.sort((a,b) => b.score - a.score);
+        const top3Num = recCandidates.slice(0,3);
+
+        document.getElementById('specialNumArea').innerHTML = `
+          <div class="card">
+            <div class="section-title">🔢 特码号码频次分析</div>
+            <div class="table-responsive">
+              <table id="specialNumTable">
+                <thead><tr><th>号码</th><th>次数</th><th>概率</th><th>状态</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="chart-wrap"><canvas id="specialNumChart"></canvas></div>
+            <div class="recommend-box">
+              <div class="rec-title">🎯 本期特码号码推荐</div>
+              <p style="font-weight:500; margin-bottom:10px;">最可能开出的特码号码：${top3Num.map(n => n.number).join('、')}</p>
+              <div class="rec-items">
+                ${top3Num.map(n => `<div class="rec-badge">${n.number} (得分${n.score.toFixed(1)})</div>`).join('')}
+              </div>
+              <p style="font-size:0.75rem; color:#888; margin-top:8px;">* 综合总出现次数、近30期热度与遗漏值</p>
+            </div>
+          </div>
+        `;
+        document.getElementById('specialNumArea').style.display = 'block';
+        document.getElementById('zodiacResult').style.display = 'none';
+        document.getElementById('recommendArea').style.display = 'none';
+
         renderTable('specialNumTable', stats, ['number','count','probability','status']);
-        // 图表按号码顺序
         const labels = Array.from({length:49}, (_,i) => (i+1).toString().padStart(2,'0'));
         const values = labels.map(l => {
           const found = stats.find(s => s.number === l);
           return found ? found.count : 0;
         });
         drawBarChart('specialNumChart', labels, values);
-        document.getElementById('specialNumArea').style.display = 'block';
-        document.getElementById('zodiacResult').style.display = 'none';
-        document.getElementById('recommendArea').style.display = 'none';
       });
     })();
   </script>
